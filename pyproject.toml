@@ -1,0 +1,27 @@
+[project]
+name = "pjs-neo-rag"
+version = "0.1.0"
+description = "Graph RAG on Neo4j"
+readme = "README.md"
+authors = [
+    { name = "Phil Soady", email = "phil.soady@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.121.1",
+    "neo4j>=6.0.3",
+    "pydantic>=2.12.4",
+    "pymupdf>=1.26.6",
+    "python-dotenv>=1.2.1",
+    "requests>=2.32.5",
+    "tqdm>=4.67.1",
+    "trafilatura>=2.0.0",
+    "uvicorn>=0.38.0",
+]
+
+[project.scripts]
+pjs-neo-rag = "pjs_neo_rag:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
