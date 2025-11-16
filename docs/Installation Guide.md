@@ -193,14 +193,22 @@ NEO4J_URI=bolt://localhost:7687
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=<redacted>
 NEO4J_DATABASE=neo4j
-
+EMBED_PROVIDER=ollama
+CHAT_PROVIDER=ollama
 OLLAMA_URL=http://localhost:11434
-EMBEDDER_MODEL=bge-m3
-EMBED_DIM=1024
+VLLM_URL=http://localhost:8001
+OLLAMA_EMBED_MODEL=bge-m3
+OLLAMA_EMBED_DIM=1024
+OLLAMA_CHAT_MODEL=mistral:7b
+VLLM_EMBED_MODEL=BAAI/bge-m3
+VLLM_EMBED_DIM=1024
+VLLM_CHAT_MODEL=mistralai/Mistral-7B-Instruct-v0.2
 
 SOURCE_DIR=/path/to/your/pdf/documents
 API_PORT=8000
 ```
+
+Toggle providers by changing `EMBED_PROVIDER` and `CHAT_PROVIDER` between `ollama` and `vllm`. The corresponding `*_MODEL` and `*_EMBED_DIM` variables tell each service which model configuration to use.
 
 ### Initialize Database
 

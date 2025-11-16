@@ -1,32 +1,69 @@
-"""
-Ollama API integration for embeddings and LLM interactions.
-"""
+"""Ollama provider implementation for embeddings and chat."""
 
-import math
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Dict, List
+
 import requests
-from pjs_neo_rag.config import settings
+from requests import RequestException
 
 
-def embed_ollama(text: str):
-    """
-    Generate normalized embedding vector using Ollama.
+@dataclass(slots=True)
+class OllamaProvider:
+    base_url: str
+    embed_model: str
+    chat_model: str
+    name: str = "ollama"
 
-    Args:
-        text: Input text to embed
+    def embed(self, text: str) -> List[float]:
+        payload = {
+            "model": self.embed_model,
+            "prompt": text if text and text.strip() else " ",
+        }
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/embeddings", json=payload, timeout=60
+            )
+            response.raise_for_status()
+        except RequestException as exc:  # connection/refused/timeouts etc.
+            raise RuntimeError(
+                f"Ollama embedding provider not reachable at {self.base_url}. "
+                "Ensure ollama is running and OLLAMA_URL is correct."
+            ) from exc
 
-    Returns:
-        Normalized embedding vector (list of floats)
-    """
-    if not text or not text.strip():
-        text = " "
-    r = requests.post(
-        f"{settings.OLLAMA_URL}/api/embeddings",
-        json={"model": settings.EMBEDDER_MODEL, "prompt": text},
-        timeout=60,
+        data = response.json()
+        return data["embedding"]
+
+    def chat(self, prompt: str, **kwargs: Any) -> str:
+        body: Dict[str, Any] = {
+            "model": self.chat_model,
+            "prompt": prompt,
+            "stream": False,
+        }
+        body.update(kwargs)
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/generate", json=body, timeout=120
+            )
+            response.raise_for_status()
+        except RequestException as exc:
+            raise RuntimeError(
+                f"Ollama chat provider not reachable at {self.base_url}. "
+                "Ensure ollama is running and OLLAMA_URL is correct."
+            ) from exc
+
+        data = response.json()
+        return data.get("response", "")
+
+
+def embed_ollama(text: str) -> List[float]:
+    """Convenience function for embedding via Ollama with default settings."""
+    from pjs_neo_rag.config import settings  # local import to avoid cycles
+
+    provider = OllamaProvider(
+        base_url=settings.OLLAMA_URL,
+        embed_model=settings.OLLAMA_EMBED_MODEL,
+        chat_model=settings.OLLAMA_CHAT_MODEL,
     )
-    r.raise_for_status()
-    v = r.json()["embedding"]
-    if len(v) != settings.EMBED_DIM:
-        raise ValueError(f"Embedding dim {len(v)} != {settings.EMBED_DIM}")
-    n = math.sqrt(sum(x * x for x in v)) or 1.0
-    return [x / n for x in v]
+    return provider.embed(text)

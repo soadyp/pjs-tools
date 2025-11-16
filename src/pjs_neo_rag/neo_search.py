@@ -5,7 +5,7 @@ Separate from API layer for reusability and testing.
 
 from neo4j import GraphDatabase
 from pjs_neo_rag.config import settings
-from pjs_neo_rag.ollama import embed_ollama
+from pjs_neo_rag.embeddings import embed_vector
 
 
 # ---- database connection ----
@@ -26,8 +26,8 @@ def dual_vector_search(query: str, k: int = 8):
     Returns:
         List of result dicts with chunk_id, text, latex, page_start, page_end, score
     """
-    v_text = embed_ollama(query)
-    v_latex = embed_ollama(query)
+    v_text = embed_vector(query)
+    v_latex = embed_vector(query)
 
     # Query text embeddings
     cypher_text = """
