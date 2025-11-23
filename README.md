@@ -23,6 +23,29 @@ This project provides a Python-based RAG pipeline that:
 
 ## Quick Start
 
+### Option 1: Containerized Deployment (Recommended)
+
+```bash
+# 1. Configure environment
+cp .env.example .env
+# Edit .env with your settings
+
+# 2. Start all services
+podman-compose up -d
+
+# 3. Pull models
+podman exec ollama-std ollama pull bge-m3
+podman exec ollama-std ollama pull mistral:7b
+
+# 4. Initialize database and ingest documents
+podman exec pjs-neo-rag-app python src/pjs_neo_rag/create_neo_indexes.py
+podman exec pjs-neo-rag-app python src/pjs_neo_rag/ingest_files.py
+```
+
+See **[Deployment Guide](docs/Deployment.md)** for complete instructions.
+
+### Option 2: Local Development
+
 ```bash
 # Create indexes
 python src/pjs_neo_rag/create_neo_indexes.py
@@ -46,10 +69,11 @@ Comprehensive documentation is available in the `docs/` directory:
 
 ### Component Guides
 
+- **[Deployment Guide](docs/Deployment.md)** - Container-based deployment (recommended)
 - **[Neo4j Setup](docs/Neo4j.md)** - Database configuration and commands
 - **[Ollama Setup](docs/OLLAMA.md)** - Embedding and LLM models
+- **[Podman Setup](docs/PODMAN.md)** - Container runtime with GPU support
 - **[Open-WebUI Setup](docs/OPEN-WEBUI.md)** - Chat interface configuration
-- **[Podman Setup](docs/PODMAN.md)** - Container runtime
 - **[MCP Integration](docs/MCP.md)** - Model Context Protocol server
 - **[NVIDIA GPU](docs/NVIDIA%20Notes.md)** - GPU acceleration
 
@@ -67,12 +91,19 @@ See [architecture diagram](docs/Welcome%20to%20Local%20AI%20with%20Neo4j%20DB%20
 
 ## Requirements
 
+### Containerized Deployment
+- Podman (OCI-compatible)
+- NVIDIA GPU with drivers
+- NVIDIA Container Toolkit
+- 16GB+ RAM recommended
+
+### Local Development
 - Python 3.13+
 - Neo4j 5.x
 - Ollama with bge-m3 and mistral:7b models
 - 16GB+ RAM recommended
 
-See the [Installation Guide](docs/Installation%20Guide.md) for complete setup instructions.
+See the [Deployment Guide](docs/Deployment.md) for containerized setup or [Installation Guide](docs/Installation%20Guide.md) for local development setup.
 
 ## Project Structure
 
