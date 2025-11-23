@@ -3,7 +3,10 @@ Core search logic for dual-vector RAG retrieval.
 Separate from API layer for reusability and testing.
 """
 
+from typing import Any
+
 from neo4j import GraphDatabase
+
 from pjs_neo_rag.config import settings
 from pjs_neo_rag.embeddings import embed_vector
 
@@ -15,7 +18,7 @@ driver = GraphDatabase.driver(
 
 
 # ---- core search logic ----
-def dual_vector_search(query: str, k: int = 8):
+def dual_vector_search(query: str, k: int = 8) -> list[dict[str, Any]]:
     """
     Perform dual vector search (text + latex embeddings) and merge results.
 
@@ -26,8 +29,8 @@ def dual_vector_search(query: str, k: int = 8):
     Returns:
         List of result dicts with chunk_id, text, latex, page_start, page_end, score
     """
-    v_text = embed_vector(query)
-    v_latex = embed_vector(query)
+    v_text: list[float] = embed_vector(query)
+    v_latex: list[float] = embed_vector(query)
 
     # Query text embeddings
     cypher_text = """
@@ -54,16 +57,20 @@ def dual_vector_search(query: str, k: int = 8):
     """
 
     with driver.session(database=settings.NEO4J_DATABASE) as s:
-        text_results = s.run(cypher_text, v_text=v_text).data()
-        latex_results = s.run(cypher_latex, v_latex=v_latex).data()
+        text_results: list[dict[str, Any]] = s.run(cypher_text, v_text=v_text).data()
+        latex_results: list[dict[str, Any]] = s.run(
+            cypher_latex, v_latex=v_latex
+        ).data()
 
     # Merge and deduplicate by chunk_id, keeping highest score
-    merged = {}
+    merged: dict[str, dict[str, Any]] = {}
     for result in text_results + latex_results:
-        chunk_id = result["chunk_id"]
+        chunk_id: str = result["chunk_id"]
         if chunk_id not in merged or result["score"] > merged[chunk_id]["score"]:
             merged[chunk_id] = result
 
     # Sort by score and limit
-    rows = sorted(merged.values(), key=lambda x: x["score"], reverse=True)
+    rows: list[dict[str, Any]] = sorted(
+        merged.values(), key=lambda x: x["score"], reverse=True
+    )
     return rows[: max(1, min(k, 20))]

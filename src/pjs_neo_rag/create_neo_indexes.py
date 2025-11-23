@@ -40,8 +40,44 @@ FULLTEXT: list[LiteralString] = [
 ]
 
 
-def run():
+def drop_vector_indexes():
+    """Drop all vector indexes - necessary when changing embedding dimensions."""
     driver = get_driver()
+    try:
+        with driver.session(database=DB) as s:
+            s.run("DROP INDEX chunk_vec_text IF EXISTS")
+            s.run("DROP INDEX chunk_vec_latex IF EXISTS")
+            s.run("DROP INDEX fact_vec IF EXISTS")
+            print(f"🗑️  Dropped vector indexes on database '{DB}'")
+    finally:
+        driver.close()
+
+
+def clear_all_data():
+    """Delete all nodes and relationships - use when re-ingesting with new dimensions."""
+    driver = get_driver()
+    try:
+        with driver.session(database=DB) as s:
+            s.run("MATCH (n) DETACH DELETE n")
+            print(f"🗑️  Cleared all data from database '{DB}'")
+    finally:
+        driver.close()
+
+
+def run(force_recreate: bool = False):
+    """
+    Create indexes.
+
+    Args:
+        force_recreate: If True, drops vector indexes first (needed when dimensions change)
+    """
+    driver = get_driver()
+
+    if force_recreate:
+        print("⚠️  Force recreate mode - dropping vector indexes and all data")
+        drop_vector_indexes()
+        clear_all_data()
+
     try:
         with driver.session(database=DB) as s:
             for q in BTREE:
@@ -57,4 +93,7 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    import sys
+
+    force = "--force" in sys.argv or "-f" in sys.argv
+    run(force_recreate=force)

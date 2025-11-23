@@ -26,6 +26,15 @@ class OllamaProvider:
                 f"{self.base_url}/api/embeddings", json=payload, timeout=60
             )
             response.raise_for_status()
+        except requests.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                raise RuntimeError(
+                    f"Ollama model '{self.embed_model}' not found. "
+                    f"Pull it with: ollama pull {self.embed_model}"
+                ) from exc
+            raise RuntimeError(
+                f"Ollama embedding request failed: {exc.response.status_code if exc.response else 'unknown'}"
+            ) from exc
         except RequestException as exc:  # connection/refused/timeouts etc.
             raise RuntimeError(
                 f"Ollama embedding provider not reachable at {self.base_url}. "
@@ -47,6 +56,15 @@ class OllamaProvider:
                 f"{self.base_url}/api/generate", json=body, timeout=120
             )
             response.raise_for_status()
+        except requests.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                raise RuntimeError(
+                    f"Ollama model '{self.chat_model}' not found. "
+                    f"Pull it with: ollama pull {self.chat_model}"
+                ) from exc
+            raise RuntimeError(
+                f"Ollama chat request failed: {exc.response.status_code if exc.response else 'unknown'}"
+            ) from exc
         except RequestException as exc:
             raise RuntimeError(
                 f"Ollama chat provider not reachable at {self.base_url}. "

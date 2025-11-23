@@ -11,10 +11,7 @@
             "program": "${workspaceFolder}/src/app.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
-            "envFile": "${workspaceFolder}/.env",
-            "env": {
-                "NEO4J_PASSWORD": "${env:NEO4J_PASSWORD}"
-            }
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "name": "python file",
@@ -22,9 +19,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/${relativeFile}",
             "console": "integratedTerminal",
-            "env": {
-                "NEO4J_PASSWORD": "${env:NEO4J_PASSWORD}"
-            }
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

@@ -16,12 +16,16 @@ python app.py
 ```
 Server runs on: http://127.0.0.1:8000
 
-### 2. Add HTTP Tool in Open-WebUI
+### 2. Create HTTP Tool in Open-WebUI
 
-Navigate to: **Settings → Tools → HTTP → Add Tool**
+**Location:** Navigate to **Workspace → Tools** (or **Settings → Tools**)
 
-**Configuration:**
-- **Name:** `graphrag.search`
+Click **+ Create a Tool** (or **Add Tool** button)
+
+**Tool Configuration:**
+- **Name:** `graphrag_search` (this will appear in the Tools list)
+- **Description:** `Search Neo4j knowledge graph for scientific documents`
+- **Type:** `HTTP Request` (or `Function`)
 - **Method:** `POST`
 - **URL:** `http://127.0.0.1:8000/search`
 - **Headers/Auth:** (leave empty)
@@ -56,14 +60,20 @@ Navigate to: **Settings → Tools → HTTP → Add Tool**
 
 Click **Save**
 
-### 3. Model Settings
+### 3. Enable Tool for Model
 
-Navigate to: **Settings → Models**
+Navigate to: **Workspace → Models** (or model dropdown)
 
-- **Model:** `mistral:7b-instruct` (or your Ollama model)
-- **Function/Tool Calling:** `ON (Native)` ⚠️ **CRITICAL**
-- **Temperature:** `0.2–0.4` (optional, for focused answers)
-- **Max Tokens:** `1024` (optional)
+1. Select your model (e.g., `mistral:7b`)
+2. Click the **Settings/Edit** icon (gear or pencil)
+3. Find the **Tools** section
+4. **Check the box** next to `graphrag_search` (your tool name)
+5. Find **Capabilities** section
+6. Ensure **Function/Tool Calling:** `ON (Native)` ⚠️ **CRITICAL**
+7. Optional settings:
+   - **Temperature:** `0.2–0.4` (for focused answers)
+   - **Max Tokens:** `1024`
+8. Click **Save & Update**
 
 ### 4. System Prompt (Recommended)
 
@@ -128,10 +138,13 @@ Explain how Clifford algebra relates to the content. Cite sources.
   python src/pjs_neo_rag/create_neo_indexes.py
   ```
 
-#### Tool not appearing in chat
-- ✅ Refresh Open-WebUI page
-- ✅ Check tool is enabled in workspace settings
-- ✅ Verify tool name is exactly `graphrag.search`
+#### Tool not appearing or not being called
+- ✅ Refresh Open-WebUI page (hard refresh: Ctrl+Shift+R)
+- ✅ Check tool is **checked/enabled** in model's Tools section
+- ✅ Verify Function/Tool Calling is **ON (Native)**
+- ✅ Model must support function calling (look for `-instruct` models)
+- ✅ Try logging out and back in to Open WebUI
+- ✅ Check browser console for errors (F12)
 
 ### 7. Enhanced Prompting Tips
 

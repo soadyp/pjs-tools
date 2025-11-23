@@ -29,5 +29,6 @@ class Passage(BaseModel):
     summary="Search Neo4j knowledge graph",
     description="Dual-vector search across text and LaTeX embeddings",
 )
-def graphrag_search(req: SearchReq):
-    return dual_vector_search(req.query, req.k)
+def graphrag_search(req: SearchReq) -> list[Passage]:
+    results = dual_vector_search(req.query, req.k)
+    return [Passage(**result) for result in results]
