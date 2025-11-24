@@ -9,7 +9,7 @@ http://localhost:7474/browser/
 http://localhost:7474/browser/preview/
 
 
-NEO MCP  should be installed in use/local/bin
+NEO MCP  should be installed in /usr/local/bin
 
 ## cypher-shell
 cypher-shell --version

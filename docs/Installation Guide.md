@@ -17,6 +17,10 @@ sudo apt install flatpak
 
 ## 2. Install Neo4j Community Edition
 
+**Note:** This section covers **native (bare metal)** installation on Debian/Ubuntu. For the recommended **containerized (Podman)** setup, please see the [Quick Start Guide](QUICKSTART.md) or [Deployment Guide](Deployment.md).
+
+### Option A: Native Installation (Debian/Ubuntu)
+
 ### Download and Install
 ```bash
 # Add Neo4j repository
