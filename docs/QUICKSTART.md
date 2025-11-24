@@ -366,18 +366,69 @@ python src/pjs_neo_rag/ingest_files.py
 **End-to-End Test:**
 - [ ] Chat query triggers tool call and returns citations like [p.2], [p.5]
 
+## Updating the System
+
+### Update Container Images
+
+Check for and install updated versions of containerized services:
+
+```bash
+# Update Neo4j
+podman pull neo4j:5.26.0
+podman stop neo4j && podman rm neo4j
+podman run -d --name neo4j --network host \
+  -e NEO4J_AUTH=neo4j/yourpassword \
+  -v neo4j-data:/data neo4j:5.26.0
+
+# Update Open-WebUI
+podman pull ghcr.io/open-webui/open-webui:main
+podman stop open-webui && podman rm open-webui
+podman run -d --name open-webui --network host \
+  -v open-webui-data:/app/backend/data \
+  ghcr.io/open-webui/open-webui:main
+```
+
+**Note:** Your data (database, settings) persists in volumes and won't be lost.
+
+### Update Python Application
+
+```bash
+# Pull latest code
+cd ~/pjs-neo-rag
+git pull
+
+# Update dependencies
+source .venv/bin/activate
+pip install -e . --upgrade
+
+# Restart API server
+# Stop the running server (Ctrl+C in its terminal)
+python src/app.py
+```
+
+### Update Ollama Models
+
+```bash
+# Update existing model
+ollama pull bge-m3
+
+# Or pull different model and update .env
+ollama pull bge-large
+nano .env  # Change OLLAMA_EMBED_MODEL=bge-large
+```
+
 ## Next Steps
 
 - **Add more documents**: Copy PDFs to SOURCE_DIR, run `ingest_files.py`
 - **Tune retrieval**: Adjust `k`, `CHUNK_TOKENS`, weights in `.env`
 - **Try different models**: `ollama pull` other models and update .env
-- **Backup data**: `podman volume` commands or export Neo4j
+- **Backup data**: See [PODMAN.md](./PODMAN.md) for volume backup
 
 ## Support
 
 - **README.md** - Project overview
-- **docs/Installation Guide.md** - Detailed component setup
-- **docs/OPEN-WEBUI-INTEGRATION.md** - Advanced integration options
+- **docs/PODMAN.md** - Container management and updates
+- **docs/OPEN-WEBUI-INTEGRATION.md** - Tool configuration details
 - **docs/Troubleshooting.md** - Common issues
 
 For issues, check existing documentation or open a GitHub issue.

@@ -12,12 +12,25 @@ Podman is the container runtime used for running Ollama and Open-WebUI with GPU 
 ### 1. Install Podman
 
 ```bash
+# Install Podman
 sudo apt-get update
 sudo apt-get install -y podman
+
+# Verify installation
+podman --version
 ```
 
-Optionally install Podman Desktop (recommended for GUI management):
-- Download from https://podman-desktop.io/
+**Optional: Install Podman Desktop** (GUI for container management):
+```bash
+# Download from https://podman-desktop.io/
+# Or install via package manager if available
+```
+
+Podman Desktop provides:
+- Visual container management
+- Image browsing and updates
+- Volume and network inspection
+- Easy container logs viewing
 
 ### 2. Install NVIDIA Container Toolkit
 
@@ -142,11 +155,92 @@ nvidia-ctk cdi list
 
 **Solution:** Ensure the volume name matches: `-v ollama-data:/root/.ollama`
 
+## Managing Container Images
+
+### Updating Containers
+
+When new versions are available, update your containers:
+
+```bash
+# Update Neo4j
+podman pull neo4j:5.26.0  # or :latest for newest
+podman stop neo4j
+podman rm neo4j
+# Re-run with new image (data persists in volume)
+podman run -d --name neo4j --network host \
+  -e NEO4J_AUTH=neo4j/yourpassword \
+  -v neo4j-data:/data neo4j:5.26.0
+
+# Update Open-WebUI
+podman pull ghcr.io/open-webui/open-webui:main
+podman stop open-webui
+podman rm open-webui
+podman run -d --name open-webui --network host \
+  -v open-webui-data:/app/backend/data \
+  ghcr.io/open-webui/open-webui:main
+
+# Update Ollama (with GPU)
+podman pull docker.io/ollama/ollama:latest
+podman stop ollama-std
+podman rm ollama-std
+podman run -d --name ollama-std \
+  --device nvidia.com/gpu=all \
+  --security-opt=label=disable \
+  -p 11434:11434 \
+  -v ollama-data:/root/.ollama \
+  docker.io/ollama/ollama:latest
+```
+
+**Important:** Data persists in named volumes (`-v volumename:/path`), so updates won't lose your:
+- Neo4j database (neo4j-data)
+- Open-WebUI settings (open-webui-data)
+- Ollama models (ollama-data)
+
+### List Installed Images
+
+```bash
+# Show all downloaded images
+podman images
+
+# Check for updates (manual process)
+podman pull <image-name>  # Downloads if newer available
+```
+
+### Remove Old Images
+
+```bash
+# List images
+podman images
+
+# Remove specific image
+podman rmi <image-id>
+
+# Remove all unused images (cleanup)
+podman image prune -a
+```
+
+### Check Container Status
+
+```bash
+# List running containers
+podman ps
+
+# List all containers (including stopped)
+podman ps -a
+
+# Check container logs
+podman logs <container-name>
+
+# Follow logs in real-time
+podman logs -f <container-name>
+```
+
 ## References
 
 - [NVIDIA Container Toolkit Documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 - [CDI Support Documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html)
 - [Podman GPU Support](https://github.com/containers/podman/discussions)
+- [Podman Command Reference](https://docs.podman.io/en/latest/Commands.html)
 
 
 
