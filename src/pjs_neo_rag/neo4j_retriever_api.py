@@ -5,6 +5,13 @@ from pjs_neo_rag.neo_search import dual_vector_search
 app = FastAPI(title="GraphRAG Retriever", version="0.1")
 
 
+# ---- Health check ----
+@app.get("/health", tags=["system"], summary="Health check endpoint")
+def health_check() -> dict[str, str]:
+    """Return service health status for container orchestration."""
+    return {"status": "healthy"}
+
+
 # ---- request/response ----
 class SearchReq(BaseModel):
     query: str
